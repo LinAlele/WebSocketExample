@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<style type="text/css">
+    footer {position:fixed;width:100%;  height:50px;left:0;bottom:0;padding:30px;border-top:1px solid #eee; background-color:#fff;}
+    fieldset { margin-bottom:110px;}
+</style>
+
+<script type="text/javascript" src="~/Scripts/jquery-1.11.1.min.js"></script>
+
+
+
+<script type="text/javascript">
+    
+    $(
+        function () {
+            //客户端socket对象
+            var ws;
+            //名字
+            var name = prompt("请填写您的姓名：", '');
+            
+            if (name == null || name == '') {
+                window.location.reload();
+                return;
+            }
+
+            //连接服务器
+            ws = new WebSocket("ws://" + window.location.hostname + ":8181");
+
+            //连接成功
+            ws.onopen = function () {
+                //发送姓名
+                if (ws.readyState == WebSocket.OPEN) {
+                    var data = {};
+                    data.code = 1;
+                    data.data = name;
+                    ws.send(JSON.stringify(data));
+                }
+            };
+            //接收消息
+            ws.onmessage = function (result) {
+               
+                $("fieldset").append(result.data+'<br/><br/>' );
+            };
+            //发生错误
+            ws.onerror = function (error) {
+              
+            };
+            //关闭连接
+            ws.onclose = function () {
+               
+            };
+            
+            $("footer button").click(function () {
+                var inputText = $('footer input').val();
+
+                if (inputText == '') {
+                    alert('内容不能为空');
+                    return;
+                }
+
+                if (ws.readyState == WebSocket.OPEN) {
+                    var data = {};
+                    data.code = 2;
+                    data.data = inputText;
+                    ws.send(JSON.stringify(data));
+                }
+                else {
+                    alert('连接已关闭');
+                }
+
+                $('footer input').val('');
+            });
+        }
+    )
+</script>
+
+<fieldset>
+  
+</fieldset>
+
+<footer>
+    <input placeholder="请输入聊天内容" />
+    <button>发送</button>
+</footer>
